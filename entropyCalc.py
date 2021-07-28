@@ -5,6 +5,8 @@ import scipy.stats as st
 from hashlib import md5, sha256, sha512
 import argparse
 from math import log2
+import sys
+import os
 import codecs
 
 def listString(text):
@@ -18,7 +20,7 @@ def makeHash(text):
   # hashes["SHA256"] = sha256(text.encode()).digest().decode('UTF-8', 'replace')
   # hashes["SHA512"] = sha512(text.encode()).digest().decode('UTF-8', 'replace')
 
-  hashes['originalHex'] = text
+  #hashes['originalHex'] = text
   hashes["Original"] = text.encode().hex()
   hashes["MD5"] = md5(text.encode()).hexdigest()
   hashes["SHA256"] = sha256(text.encode()).hexdigest()
@@ -56,24 +58,42 @@ def calculate_shannon_entropy(string):
         ent = ent + freq * log2(freq)
     return -ent
 
+def process_pcap(pcap_file):
+  print('Opening {}...'.format(pcap_file))
+
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--file", metavar='<file>', help="File to parse", required=True, type=str)
-  file = parser.parse_args()
+  group = parser.add_mutually_exclusive_group(required=True)
+  group.add_argument("--text-file", metavar="<text file name>", \
+                        help="Text file to parse, extract hashes, and calculate entropy.", dest="file")
+  group.add_argument("--pcap-file", metavar="<pcap file name>", \
+                        help="Pcap file to parse and calculate entropy", dest="file")
+  args = parser.parse_args()
 
-  with open(file.file, 'r') as f:
-    # Slurp the whole file and efficiently convert it to hex all at once
-    #hexdata = binascii.hexlify(f.read())
-    data = f.read()
+  file_name = args.file
 
-    print("\nTexto utilizado: {}".format(data))
-    print("Todos os formatos são apresentados em hexadecimal\n")
-
-    for key,value in makeHash(data).items():
-      print("Formato {}: {}".format(key,value))
-      print("   Sua entropia: {} bits.\n".format(calculate_shannon_entropy(value)))#calcEntropy(value)))
+  if not os.path.isfile(file_name):
+    print('"{}" does not exist'.format(file_name), file=sys.stderr)
+    sys.exit(-1)
   
-  print('=================================================FIM=================================================\n')
+  if '.txt' in file_name:
+    with open(file_name, 'r') as f:
+      # Slurp the whole file and efficiently convert it to hex all at once
+      #hexdata = binascii.hexlify(f.read())
+      data = f.read()
+
+      print("\nTexto utilizado: {}".format(data))
+      print("Todos os formatos são apresentados em hexadecimal\n")
+
+      for key,value in makeHash(data).items():
+        print("Formato {}: {}".format(key,value))
+        print("   Sua entropia: {} bits.\n".format(calculate_shannon_entropy(value)))
+
+      print('=================================================FIM=================================================\n')
+  elif '.pcap' in file_name:
+    process_pcap(file_name)
+  else:
+    print('"{}" does not correspond to the specified type'.format(file_name), file=sys.stderr)
 
 if __name__ == '__main__':
   main()
