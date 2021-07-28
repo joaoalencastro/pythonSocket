@@ -2,13 +2,8 @@
 
 import socket
 
-'''
-### Este código está sendo baseado na seguinte página web:
-### https://docs.python.org/3/howto/sockets.html
-'''
-
-HOST = '127.0.0.1'
-PORT = 8080
+HOST = '0.0.0.0'
+PORT = 8088
 
 # create an INET, STREAMing socket | Using with statement means we don't have to close the socket
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serversocket:

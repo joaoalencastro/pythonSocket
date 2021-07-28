@@ -4,8 +4,8 @@ import socket
 import hashlib
 from datetime import datetime
 
-HOST = '127.0.0.1'
-PORT = 8080
+HOST = 'localhost'
+PORT = 8088
 
 # create an INET, STREAMing socket
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -14,9 +14,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     # get the current timestamp
     time = datetime.now()
     # make the hash string
-    result = hashlib.md5(str(time).encode())
+    result = hashlib.md5(str(time).encode()).digest()
+    result1 = hashlib.sha256(str(time).encode()).digest()
+    result2 = hashlib.sha512(str(time).encode()).digest()
+    resultTotal = result + result1 + result2
     # send the result
-    s.sendall(result.digest())
+    s.sendall(resultTotal)
     # now wait for the response and save it to data
     data = s.recv(1024)
 
