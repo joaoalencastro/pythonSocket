@@ -67,6 +67,8 @@ def process_pcap(pcap_file):
   f = rdpcap(pcap_file)
   
   print('{} contains {} packets'.format(pcap_file, f))
+  # Create list of dictionaries called connections
+  connections = []
 
   for packet in f:
     if isinstance(packet, Dot3):
@@ -80,11 +82,10 @@ def process_pcap(pcap_file):
     ip_pkt = packet.getlayer(IP)
     if isinstance(ip_pkt, type(None)) or ip_pkt.proto != 6:
       # If it's not a TCP, it does not matter.
-      print("out")
       continue
 
-    # It's a valid packet
-    packet.show()
+    # It's a valid packet 
+    #packet.show()
 
 
 def main():
