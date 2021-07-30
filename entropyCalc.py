@@ -9,7 +9,7 @@ import sys
 import os
 import codecs
 from scapy.utils import *
-from scapy.layers.l2 import Ether
+from scapy.layers.l2 import Ether, Dot3
 from scapy.layers.inet import IP, TCP
 
 def listString(text):
@@ -69,7 +69,21 @@ def process_pcap(pcap_file):
   print('{} contains {} packets'.format(pcap_file, f))
 
   for packet in f:
-    eth_pkt = Ether(packet)
+    if isinstance(packet, Dot3):
+      # LLC packet's type is Dot3, not Ether. They do not matter.
+      continue
+    
+    if packet.type == 34525:
+      # Check if its IPv4: 2048 or IPv6: 34525. If it's IPv6, it doesn't matter
+      continue
+
+    ip_pkt = packet.getlayer(IP)
+    if isinstance(ip_pkt, type(None)) or ip_pkt.proto != 6:
+      # If it's not a TCP, it does not matter.
+      print("out")
+      continue
+
+    # It's a valid packet
     packet.show()
 
 
