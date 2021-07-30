@@ -8,6 +8,9 @@ from math import log2
 import sys
 import os
 import codecs
+from scapy.utils import *
+from scapy.layers.l2 import Ether
+from scapy.layers.inet import IP, TCP
 
 def listString(text):
   return [char for char in text]
@@ -60,6 +63,15 @@ def calculate_shannon_entropy(string):
 
 def process_pcap(pcap_file):
   print('Opening {}...'.format(pcap_file))
+
+  f = rdpcap(pcap_file)
+  
+  print('{} contains {} packets'.format(pcap_file, f))
+
+  for packet in f:
+    eth_pkt = Ether(packet)
+    packet.show()
+
 
 def main():
   parser = argparse.ArgumentParser()
