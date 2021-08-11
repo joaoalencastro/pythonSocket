@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
+from requests.api import request
 import scipy.stats as st
 from hashlib import md5, sha256, sha512
 import argparse
@@ -11,6 +12,7 @@ import codecs
 from scapy.utils import *
 from scapy.layers.l2 import Ether, Dot3
 from scapy.layers.inet import IP, TCP
+from requests import get
 
 def listString(text):
   return [char for char in text]
@@ -85,7 +87,8 @@ def process_pcap(pcap_file):
       continue
 
     # It's a valid packet 
-    #packet.show()
+    packet.show()
+
 
 
 def main():
