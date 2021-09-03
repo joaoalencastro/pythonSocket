@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from elasticsearch import Elasticsearch
+from bientropy import bien, tbien
+from bitstring import Bits
 from math import log2
+from pandas import DataFrame
 
 def connect_elasticsearch():
   es = None
@@ -21,7 +24,7 @@ def get_packet_indices(es):
 
 def get_packets_from_index(es, index):
   # Me retorna uma lista de dicionarios, onde cada dicionário é um pacote
-  response = es.search(index=index, body={"query":{"match_all":{}}})
+  response = es.search(index=index, body={"size":10000,"query":{"match_all":{}}}, scroll='1s')
   print("Querying {} packets from index '{}'...".format(response["hits"]["total"]["value"], index))
   return response["hits"]["hits"]
 
@@ -61,26 +64,85 @@ def calculate_shannon_entropy(string):
         ent = ent + freq * log2(freq)
     return -ent
 
+def calculate_bien(string):
+  return bien(Bits(string))
+
+def calculate_tbien(string):
+  return tbien(Bits(string))
+
 if __name__ == '__main__':
   es = connect_elasticsearch()
 
-  packets = []
-  for index in get_packet_indices(es):
-    packets.append(get_packets_from_index(es, index))
-    #get_ids_from_index(es, index)
+  indices = get_packet_indices(es)
+  print(indices)
+  index = input("Chose from above which index to process: ")
 
-  for packet in packets[1]:
+  # packets is a list of dictionaries, with each dictinary being a packet
+  packets = get_packets_from_index(es, index)
+
+  # index_metadata will be the list of dictionaries of the processed data
+  records = []
+
+  for packet in packets:
     raw_data = is_udp(packet)
     if raw_data != None:
-      print("""Packet '{}'
-                Src IP: '{}'
-                Dst IP: '{}'
-                Src Port: '{}'
-                Dst Port: '{}'
-                Entropy: {} bits""".format(packet['_id'],
-                                            packet['_source']['layers']['ip']['ip_ip_src'],
-                                            packet['_source']['layers']['ip']['ip_ip_dst'],
-                                            packet['_source']['layers']['udp']['udp_udp_srcport'],
-                                            packet['_source']['layers']['udp']['udp_udp_dstport'],
-                                            calculate_shannon_entropy(raw_data)))
-      print("=============================================")
+      new_doc = {}
+      raw_data = '0x' + raw_data
+
+      new_doc['id'] = packet['_id']
+      new_doc['srcip'] = packet['_source']['layers']['ip']['ip_ip_src']
+      new_doc['dstip'] = packet['_source']['layers']['ip']['ip_ip_dst']
+      new_doc['srcport'] = packet['_source']['layers']['udp']['udp_udp_srcport']
+      new_doc['dstport'] = packet['_source']['layers']['udp']['udp_udp_dstport']
+      new_doc['shannon'] = float(calculate_shannon_entropy(raw_data[2:]))
+      new_doc['bien'] = float(calculate_bien(raw_data))
+      new_doc['tbien'] = float(calculate_tbien(raw_data))
+
+      records.append(new_doc)
+
+  index_metadata = DataFrame.from_records(records)
+  
+  request_body = {
+    # "settings" : {
+    #   "number_of_shards": 1,
+    #   "number_of_replicas": 1
+    # },
+    'mappings': {
+      'properties': {
+        'id': {'type': 'keyword'},
+        'srcip': { 'type': 'keyword'},
+        'dstip': {'type': 'keyword'},
+        'srcport': {'type': 'keyword'},
+        'dstport': {'type': 'keyword'},
+        'shannon': {'type': 'long'},
+        'bien': {'type': 'long'},
+        'tbien': {'type': 'long'}
+      }}
+  }
+  new_index = index+'-processed'
+  print("creating {} index...".format(new_index))
+  es.indices.create(index=new_index, body = request_body)
+
+  # preparing data to be sent to elastic
+  bulk_data = []
+
+  for index, row in index_metadata.iterrows():
+    data_dict = {}
+    for j in range(len(row)):
+        data_dict[index_metadata.columns[j]] = row[j]
+    op_dict = {
+        "index": {
+            "_index": new_index,
+            "_type": '_doc',
+            "_id": data_dict['id']
+        }
+    }
+    bulk_data.append(op_dict)
+    bulk_data.append(data_dict)
+
+  print(bulk_data)
+  res = es.bulk(index = new_index, body = bulk_data)
+
+  # check data is in there, and structure in there
+  #es.search(index = new_index, body={"query": {"match_all": {}}})
+  #es_indices.get_mapping(index = new_index)
