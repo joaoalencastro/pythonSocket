@@ -5,10 +5,13 @@ from bientropy import bien, tbien
 from bitstring import Bits
 from math import log2
 from pandas import DataFrame
+import csv
 
 def connect_elasticsearch():
+  host = input('Please, enter elastic host: ')
+
   es = None
-  es = Elasticsearch([{'host':'192.168.0.142', 'port': 9200}])
+  es = Elasticsearch([{'host':host, 'port': 9200}])
   if es.ping():
     print('Yay Connected')
   else:
@@ -70,6 +73,9 @@ def calculate_bien(string):
 def calculate_tbien(string):
   return tbien(Bits(string))
 
+def write_df_to_csv(df, file):
+  df.to_csv('Outputs/'+file, index=False)
+
 if __name__ == '__main__':
   es = connect_elasticsearch()
 
@@ -103,10 +109,6 @@ if __name__ == '__main__':
   index_metadata = DataFrame.from_records(records)
   
   request_body = {
-    # "settings" : {
-    #   "number_of_shards": 1,
-    #   "number_of_replicas": 1
-    # },
     'mappings': {
       'properties': {
         'id': {'type': 'keyword'},
@@ -121,6 +123,11 @@ if __name__ == '__main__':
   }
   new_index = index+'-processed'
   print("creating {} index...".format(new_index))
+
+  # Before writing data in Elastic, write data to a csv
+  write_df_to_csv(index_metadata, new_index) 
+
+  # Now, create index pattern on Elastic
   es.indices.create(index=new_index, body = request_body)
 
   # preparing data to be sent to elastic
