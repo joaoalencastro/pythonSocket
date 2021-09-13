@@ -4,7 +4,7 @@ import socket
 import hashlib
 from datetime import datetime
 
-HOST = 'localhost'
+HOST = '192.168.56.2'
 PORT = 8088
 
 # create an INET, STREAMing socket

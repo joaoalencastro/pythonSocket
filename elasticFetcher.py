@@ -42,6 +42,35 @@ def is_udp(packet):
   else:
     return None
 
+def get_transport_protocol(packet):
+  if "udp" in packet["_source"]["layers"]:
+    return "udp"
+  elif "tls" in packet["_source"]["layers"]:
+    return "tls"
+  elif "tcp" in packet["_source"]["layers"]:
+    return "tcp"
+  else:
+    return None
+  
+
+def get_payload(protocol, packet):
+  # Returns the payload
+  if protocol == 'udp':
+    payload = packet["_source"]["layers"]["udp_raw"]                  # this data is in the hex format without :
+  elif protocol == 'tcp' and "tcp_tcp_payload" in packet["_source"]["layers"]["tcp"]:
+    payload = packet["_source"]["layers"]["tcp"]["tcp_tcp_payload"]   # this data is in the hex format with :
+    payload = payload.split(':')
+    payload = ''.join(payload)
+  elif protocol == 'tls' and "tls_tls_app_data" in packet["_source"]["layers"]["tls"]:
+    payload = packet["_source"]["layers"]["tls"]["tls_tls_app_data"]  # this data is in the hex format with :
+    payload = payload.split(':')
+    payload = ''.join(payload)
+  else:
+    payload = None
+  return payload
+
+
+
 def calculate_shannon_entropy(string):
     """
     Calculates the Shannon entropy for the given string. (modificada por mim)
@@ -90,16 +119,23 @@ if __name__ == '__main__':
   records = []
 
   for packet in packets:
-    raw_data = is_udp(packet)
+    # Distinguish transport protocol
+    tp = get_transport_protocol(packet)
+    raw_data = get_payload(tp, packet)
     if raw_data != None:
       new_doc = {}
       raw_data = '0x' + raw_data
 
       new_doc['id'] = packet['_id']
+      new_doc['proto'] = tp
       new_doc['srcip'] = packet['_source']['layers']['ip']['ip_ip_src']
       new_doc['dstip'] = packet['_source']['layers']['ip']['ip_ip_dst']
-      new_doc['srcport'] = packet['_source']['layers']['udp']['udp_udp_srcport']
-      new_doc['dstport'] = packet['_source']['layers']['udp']['udp_udp_dstport']
+      if tp == 'udp': 
+        new_doc['srcport'] = packet['_source']['layers']['udp']['udp_udp_srcport']
+        new_doc['dstport'] = packet['_source']['layers']['udp']['udp_udp_dstport']
+      else: 
+        new_doc['srcport'] = packet['_source']['layers']['tcp']['tcp_tcp_srcport']
+        new_doc['srcport'] = packet['_source']['layers']['tcp']['tcp_tcp_dstport']
       new_doc['shannon'] = float(calculate_shannon_entropy(raw_data[2:]))
       new_doc['bien'] = float(calculate_bien(raw_data))
       new_doc['tbien'] = float(calculate_tbien(raw_data))
@@ -112,6 +148,7 @@ if __name__ == '__main__':
     'mappings': {
       'properties': {
         'id': {'type': 'keyword'},
+        'proto': {'type': 'keyword'},
         'srcip': { 'type': 'keyword'},
         'dstip': {'type': 'keyword'},
         'srcport': {'type': 'keyword'},
