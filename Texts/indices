@@ -1,0 +1,16 @@
+packets-2020.04.23 -> UFTPv5 encrypted and non-encrypted traffic *
+
+packets-2021.08.19 -> random data that I've collected
+
+packets-2021.08.20 -> only DNS legimit *
+
+packets-2021.09.06 -> sum of MD5, SHA256, SHA512 HASHES *
+
+packets-2020.07.23 -> Netcat of strings, files and characters *
+
+packets-1999.12.03 -> Telnet raw *
+
+packets-2017.05.17 -> short sample of a SMB3 connection to an encrypted (AES-128-CCM) share *
+
+
+* Already plotted
