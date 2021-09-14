@@ -51,7 +51,6 @@ def get_transport_protocol(packet):
     return "tcp"
   else:
     return None
-  
 
 def get_payload(protocol, packet):
   # Returns the payload
@@ -69,7 +68,25 @@ def get_payload(protocol, packet):
     payload = None
   return payload
 
+def get_ports(protocol, packet):
+  ports = []
+  if protocol == 'udp': 
+    ports.append(packet['_source']['layers']['udp']['udp_udp_srcport'])
+    ports.append(packet['_source']['layers']['udp']['udp_udp_dstport'])
+  else: 
+    ports.append(packet['_source']['layers']['tcp']['tcp_tcp_srcport'])
+    ports.append(packet['_source']['layers']['tcp']['tcp_tcp_dstport'])
+  return ports
 
+def get_payload_size(protocol, packet):
+  # Returns the payload size of the Transport Layer
+  if protocol == 'udp':
+    size = packet["_source"]["layers"]["udp"]["udp_udp_length"]
+  elif protocol == 'tcp' or protocol == 'tls' and "tcp_tcp_payload" in packet["_source"]["layers"]["tcp"]:
+    size = packet["_source"]["layers"]["tcp"]["tcp_tcp_len"]
+  else:
+    size = None
+  return size
 
 def calculate_shannon_entropy(string):
     """
@@ -119,10 +136,13 @@ if __name__ == '__main__':
   records = []
 
   for packet in packets:
-    # Distinguish transport protocol
+    # Collect packet's intel
     tp = get_transport_protocol(packet)
     raw_data = get_payload(tp, packet)
-    if raw_data != None:
+    ports = get_ports(tp, packet) # ports is a two element vector with the source and destiny ports information
+    payload_size = get_payload_size(tp, packet)
+
+    if raw_data != None and payload_size != None:
       new_doc = {}
       raw_data = '0x' + raw_data
 
@@ -130,13 +150,10 @@ if __name__ == '__main__':
       new_doc['proto'] = tp
       new_doc['srcip'] = packet['_source']['layers']['ip']['ip_ip_src']
       new_doc['dstip'] = packet['_source']['layers']['ip']['ip_ip_dst']
-      if tp == 'udp': 
-        new_doc['srcport'] = packet['_source']['layers']['udp']['udp_udp_srcport']
-        new_doc['dstport'] = packet['_source']['layers']['udp']['udp_udp_dstport']
-      else: 
-        new_doc['srcport'] = packet['_source']['layers']['tcp']['tcp_tcp_srcport']
-        new_doc['srcport'] = packet['_source']['layers']['tcp']['tcp_tcp_dstport']
-      new_doc['shannon'] = float(calculate_shannon_entropy(raw_data[2:]))
+      new_doc['srcport'] = ports[0]
+      new_doc['dstport'] = ports[1]
+      new_doc['payload_size'] = payload_size
+      new_doc['shannon'] = float(calculate_shannon_entropy(raw_data[2:])) # for shannon's entropy we have to cut out the '0x'
       new_doc['bien'] = float(calculate_bien(raw_data))
       new_doc['tbien'] = float(calculate_tbien(raw_data))
 
@@ -153,10 +170,12 @@ if __name__ == '__main__':
         'dstip': {'type': 'keyword'},
         'srcport': {'type': 'keyword'},
         'dstport': {'type': 'keyword'},
+        'payload_size' : {'type': 'long'},
         'shannon': {'type': 'long'},
         'bien': {'type': 'long'},
         'tbien': {'type': 'long'}
-      }}
+      }
+    }
   }
   new_index = index+'-processed'
   print("creating {} index...".format(new_index))
