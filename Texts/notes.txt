@@ -1,0 +1,123 @@
+Próximos passos:
+	[IMPORTANTES]
+		- Expandir o tanto de pacotes que eu consigo capturar
+		- Colocar o DNSStager pra rodar
+			E então, diferenciar tráfego criptografado (DNSStager) do não criptografado
+		- Em sequência, devo plotar de algum CSV essas entropias.
+
+	- O DNSStager usa XOR, depois devo usar uma criptografia de verdade, como, AES256.
+	- Tirar os índices que já foram trabalhados
+	- Criar uma classe para o pacote
+		Criar diferenciação de flags do tcp (por ora usarei UDP)
+			Protocolos famosos que usam UDP são: {DNS:53,DHCP:67,68,TFTP:69,SNMP:161,162,NFS:2049}
+	- Usar a query "track_total_hits" p/ falar exatamente o numero de hits 'eq'
+
+
+TMP INFO:
+packets-2021.08.19
+"tcp_tcp_flags_ack" : true
+
+Blz, nao dá pra puxar todos os pacotes de um índice de uma vez. Tenho que pegar os ids ants.
+
+Meu programa está calculando a entropia para 
+
+Reunião
+	Uma outra entropia pode se Entende-se que é um custo computacional baixo
+	XOR NAO EH CRIPTOGRAFADO, ALGORITMO DE CRIPTOGRAFIA EH CRIPTOGRAFIA
+	DEVO CRIAR UMA TABELA PARA COMPARAÇÃO DE ENTROPIAS [NORMAL, HASH, XOR, AES256]
+	
+	[EXTREMAMENTE IMPORTANTE]
+	Esse fds focar em achar artigo que resolve esse problema
+			A entropia resolve esse problema pra mim? Ela descobre se há criptografia ou não?
+	
+	
+PRÓXIMA REUNIÃO
+
+	- Mandar um simples parágrafo em plain text, e ciphered e criptografado.
+	
+	
+	
+	
+	
+	
+	
+layers.tcp.tcp_flags_tcp_flags_str_raw.keyword : "8018" or layers.tcp.tcp_flags_tcp_flags_str_raw.keyword :"5018" or
+layers.tcp.tcp_flags_tcp_flags_str_raw.keyword :"5010"
+
+
+-		·······AP···				PSH, ACK		0x018	Application Data
+5010 -	.......A...					ACK				0x010	Not App Data
+5011	.......A..F					FIN, ACK		0x011	Not App Data
+8002	.........S.					SYN				0x002	Not App Data
+5018	........P..					PSH				0x018	Application Data
+									RST				0x004	Not App Data
+
+									PSH, ACK		0x018
+									
+
+-> Separar os TCPs por flags #Na vdd não pq isso excluiría pacotes TCP válidos que não têm essa propriedade 
+	$ Na vdd, se eu separar pelo tamanho do pacote não haverá problema.
+-> Devo plotar em ordem crescente do tamanho de pacote (não sei se o plot ordena ou se devo fazer isso antes)
+	$ O plot por tamanho crescente não é tão interessante por agora.
+-> Criar fluxos de 256 bytes
+
+	~~~~~~~~ATENÇÃO~~~~~~~~
+-> A função da BiEn briga comigo dizendo que não deve ser usada em string binarárias maiores que 32 bits.
+-> Olhar no artigo como Shannon foi calculado pra ficar entre 0 e 1
+
+Primeiro farei os fluxos com 32 bits
+continuando, irei mudar o tipo de plot box pq nao dá pra ver direito onde estao os valores
+preciso adicionarmais granularidade, mais casas decimais, uma grid, e normalizar a entropia de shannon.
+
+~~~~~~~~~Depois de reler o artigo da BiEntropia~~~~~~~~~~
+Sei que os testes foram realizados por uma janela deslizante de 32 bits, e depois calculada a média e o desvio padrão dessas janelas.
+Já para a TBiEn foram feitos testes com janelas deslizantes maiores que 32 bits, como, por exemplo, 256 bits. E ainda sim, sempre por janelas deslizantes.
+Porém, para o teste de criptografia, eles usaram especificamente o algoritmo TBiEn com uma janela deslizente de 1024 bits por 1000 seções.
+
+Para a próxima prática: 
+	-> Selecionar um tamanho fixo de janela deslizante para a BiEn e outro para a TBiEn e realizar os testes novamente de acordo com a tabela que o Robson mostrou de tcp criptografado e não criptografado e udp criptografado e não criptografado. Ps:. Lembrando que ataques de C&C utilizam pouco espaço em pacotes, já que podem utilizar sinais. 
+		Tamanhos:
+			shannon_window: Não será por janela deslizante
+			bien_window: 32 bits
+			tbien_window: 32 bits
+			first_bytes: 256 bytes
+		Tipos:
+			- UDP_plaintext
+			- UDP_encrypted
+			- TCP_plaintext
+			- TCP_encrypted
+
+	Resultados:
+		O payload do pacote deverá ter pelo menos 16 bytes, caso contrário não dará certo.
+		trocar o truncate_hex de lugar pra poder aumentar a janela deslizante do tbien
+
+
+
+TLS Com Facebook:
+	Cipher Suite: TLS_AES_128_GCM_SHA256
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

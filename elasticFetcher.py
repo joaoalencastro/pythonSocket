@@ -5,7 +5,6 @@ from bientropy import bien, tbien
 from bitstring import Bits
 from math import log2
 from pandas import DataFrame
-import csv
 
 def connect_elasticsearch():
   host = input('Please, enter elastic host: ')
@@ -90,7 +89,7 @@ def get_payload_size(protocol, packet):
 
 def calculate_shannon_entropy(string):
     """
-    Calculates the Shannon entropy for the given string. (modificada por mim)
+    Calculates the standardized Shannon entropy for the given string. (modificada por mim)
 
     :param string: String to parse.
     :type string: str
@@ -111,7 +110,7 @@ def calculate_shannon_entropy(string):
       if freq > 0:
         freq = float(freq) / size
         ent = ent + freq * log2(freq)
-    return -ent
+    return -ent/log2(size)
 
 def calculate_bien(string):
   return bien(Bits(string))
@@ -121,6 +120,45 @@ def calculate_tbien(string):
 
 def write_df_to_csv(df, file):
   df.to_csv('Outputs/'+file, index=False)
+
+def truncate_hex(data, bytes):
+  '''
+  Make it divisible by number of bytes provided
+  This only works for hex strings
+  '''
+  # First, we need the first 256 bytes of our data in ASCII, which means 512 hex characters. The first 256bytes is arbitrary
+  data = data[:512]
+  # Then, we iterate it and chop the last char until is divisible by the number of bytes provided
+  while (len(data) % bytes * 2 != 0):
+      data = data[:-1]
+  if len(data) < 64:
+    return None
+  return data
+
+def sliding_window(data, test, n=32):
+  '''
+    Receives the data and the type of test it has to work (probably entropy) with and returns the mean/average of all windows of data entropy
+    n is the size of the sliding window in bytes
+  '''
+  data = truncate_hex(data, 32)  # this will make the hex raw data be divisible by 32 so we can use sliding window
+  if test != 'shannon' and test != 'bien' and test != 'tbien':
+    print("Non existing type of test or null data.")
+    return None
+  elif data == None or len(data) == 0: return None
+  elif test == 'shannon':
+    # We do not need a sliding window in this case.
+    return float(calculate_shannon_entropy(data)) # for shannon's entropy we don't need the '0x'
+  sum = 0
+  windowsize = n * 2
+  windowsnum = int(len(data)/windowsize)
+  for i in range(1, windowsnum + 1):
+    hex_data = '0x' + data[(i - 1) * windowsize : i * windowsize]
+    if test == 'bien':
+      sum += float(calculate_bien(hex_data))
+    else:
+      sum += float(calculate_tbien(hex_data))
+  avg = sum/windowsnum
+  return avg
 
 if __name__ == '__main__':
   es = connect_elasticsearch()
@@ -142,9 +180,8 @@ if __name__ == '__main__':
     ports = get_ports(tp, packet) # ports is a two element vector with the source and destiny ports information
     payload_size = get_payload_size(tp, packet)
 
-    if raw_data != None and payload_size != None:
+    if raw_data != None and payload_size != None and 'ip' in packet['_source']['layers']:
       new_doc = {}
-      raw_data = '0x' + raw_data
 
       new_doc['id'] = packet['_id']
       new_doc['proto'] = tp
@@ -153,9 +190,9 @@ if __name__ == '__main__':
       new_doc['srcport'] = ports[0]
       new_doc['dstport'] = ports[1]
       new_doc['payload_size'] = payload_size
-      new_doc['shannon'] = float(calculate_shannon_entropy(raw_data[2:])) # for shannon's entropy we have to cut out the '0x'
-      new_doc['bien'] = float(calculate_bien(raw_data))
-      new_doc['tbien'] = float(calculate_tbien(raw_data))
+      new_doc['shannon'] = sliding_window(raw_data, 'shannon')
+      new_doc['bien'] = sliding_window(raw_data, 'bien')
+      new_doc['tbien'] = sliding_window(raw_data, 'tbien')
 
       records.append(new_doc)
 
