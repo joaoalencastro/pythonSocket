@@ -8,7 +8,7 @@ from datetime import datetime
 
 HOST = 'localhost'
 PORT = 8088
-BYTES = 128
+BYTES = 32
 FILE = 'Texts/rfc761.txt'
 
 # make the hash string

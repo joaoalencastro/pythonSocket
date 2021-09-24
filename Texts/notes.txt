@@ -77,46 +77,46 @@ Porém, para o teste de criptografia, eles usaram especificamente o algoritmo TB
 Para a próxima prática: 
 	-> Selecionar um tamanho fixo de janela deslizante para a BiEn e outro para a TBiEn e realizar os testes novamente de acordo com a tabela que o Robson mostrou de tcp criptografado e não criptografado e udp criptografado e não criptografado. Ps:. Lembrando que ataques de C&C utilizam pouco espaço em pacotes, já que podem utilizar sinais. 
 		Tamanhos:
-			shannon_window: Não será por janela deslizante
-			bien_window: 32 bits
-			tbien_window: 32 bits
-			first_bytes: 256 bytes
-		Tipos:
-			- UDP_plaintext
-			- UDP_encrypted
-			- TCP_plaintext
-			- TCP_encrypted
+			shannon_window: Não será por janela deslizante ~tamanho mínimo: 8bits (o pacote não pode ter mais que dois símbolos hex)
+			bien_window: 32 bits ~tamanho mínimo: 2bits ~tamanho máximo: 32bits
+			tbien_window: 32 bits ~tamanho mínimo: 2bits (explicar que não faz sentido utilizar apenas 2 bits; ou entropia 0 ou entropia 1) ~tamanho máximo: não há máximo (a fins de estudos.....explicar de o porquê usar 32 bits)
+		Tipos/Cenários (capturas limpas):
+			- Cenário 1: UDP_plaintext
+			- Cenário 2: UDP_encrypted
+			- Cenário 3: UDP_DNS_legitimo
+			- Cenário 4: TCP_plaintext
+			- Cenário 5: TCP_encrypted
+			- Cenário 6: TCP_HTTP_legitimo
+			- Possível cenário 7: dns cover channel: ex.: dns stager
 
 	Teoria:
 		Falar que não precisa haver tanta preocupação com TLS, pois hoje em dia, equipamentos de borda já são extremamente restritos com a checagem por certificados e CAs. Além daqueles que são capazes de realizar inspeção do tráfego SSL/TLS ao fazerem a interceptação dos pacotes criptografados.
+		Explicar também que alguns bytes devem ser descartados devido ao limite imposto pelo cálculo da entropia. Dê exemplo.
 		
 	Dúvidas:
-	
-		Porque você acha que para o gráfico da densidade a curva sai do limite de entropia definido entre 0 e 1?
 		
 	Devo:
-		Usar um algoritmo de criptografia
-		Explicar a minha divisão feita por chunks para bien e tbien. E porque shannon não precisa fazer a divisão em chunks.
-		Eu preciso ter uma rotina pra discernir/mostrar o fluxo.
-		Esclarecer os códigos prontos dos quais eu faço uso.
-		Ao menos 4 protocolos de aplicação conhecidos.
-		Testar seguintes tipos para a mesma fonte (Comparação):
-			- UDP_plaintext
-			- UDP_encrypted
-			- UDP_DNS_legitimo
-			- TCP_plaintext
-			- TCP_encrypted
-			- TCP_HTTP_legitimo
+		mudar a estratégia de envio
+		fazer o corte menos pra shannon (análise) qual o tamanho mínimo
+		Deixar claro que eu não estou fazendo a comparação entre as diferentes entropia. As amostras são comparadas entre mesmas entropias.
+		Um novo gráfico comparar plaintext e cypher text p/ cada algoritmo de entropia
+		Ler de novo o paper novamente e ter uma explicação para o máximo do tbien.
 
 
-TLS Com Facebook:
-	Cipher Suite: TLS_AES_128_GCM_SHA256
+MiKTeX: C:\Users\João\AppData\Local\Programs\MiKTeX
 
+A INDEXAR:
+128bytesAESrfc761.pcapng
+32bytesAESrfc761.pcapng 					packets-2021.09.21
+64bytesAESrfc761.pcapng 
+UDP_32bytes_encryptedAES_rfc761.pcapng		packets-2021.09.22
 
-
-
-
-
+A CAPTURAR:
+UDP_64bytes_encryptedAES_rfc761.pcapng
+UDP_128bytes_encryptedAES_rfc761.pcapng
+UDP_32bytes_plaintext_rfc761.pcapng
+UDP_64bytes_plaintext_rfc761.pcapng
+UDP_128bytes_plaintext_rfc761.pcapng
 
 
 
