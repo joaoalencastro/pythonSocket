@@ -87,10 +87,26 @@ Para a próxima prática:
 			- TCP_plaintext
 			- TCP_encrypted
 
-	Resultados:
-		O payload do pacote deverá ter pelo menos 16 bytes, caso contrário não dará certo.
-		trocar o truncate_hex de lugar pra poder aumentar a janela deslizante do tbien
-
+	Teoria:
+		Falar que não precisa haver tanta preocupação com TLS, pois hoje em dia, equipamentos de borda já são extremamente restritos com a checagem por certificados e CAs. Além daqueles que são capazes de realizar inspeção do tráfego SSL/TLS ao fazerem a interceptação dos pacotes criptografados.
+		
+	Dúvidas:
+	
+		Porque você acha que para o gráfico da densidade a curva sai do limite de entropia definido entre 0 e 1?
+		
+	Devo:
+		Usar um algoritmo de criptografia
+		Explicar a minha divisão feita por chunks para bien e tbien. E porque shannon não precisa fazer a divisão em chunks.
+		Eu preciso ter uma rotina pra discernir/mostrar o fluxo.
+		Esclarecer os códigos prontos dos quais eu faço uso.
+		Ao menos 4 protocolos de aplicação conhecidos.
+		Testar seguintes tipos para a mesma fonte (Comparação):
+			- UDP_plaintext
+			- UDP_encrypted
+			- UDP_DNS_legitimo
+			- TCP_plaintext
+			- TCP_encrypted
+			- TCP_HTTP_legitimo
 
 
 TLS Com Facebook:

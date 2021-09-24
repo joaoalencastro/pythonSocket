@@ -139,8 +139,14 @@ def sliding_window(data, test, n=32):
   '''
     Receives the data and the type of test it has to work (probably entropy) with and returns the mean/average of all windows of data entropy
     n is the size of the sliding window in bytes
+    Returns the average of the vector formed by the results of the tests made in each chunk of string
   '''
-  data = truncate_hex(data, 32)  # this will make the hex raw data be divisible by 32 so we can use sliding window
+  if len(data) < 64:
+    if test == 'shannon': return float(calculate_shannon_entropy(data))
+    elif test == 'bien': return float(calculate_bien('0x'+data))
+    elif test == 'tbien': return float(calculate_tbien('0x'+data))
+  else:
+    data = truncate_hex(data, 32)  # this will make the hex raw data be divisible by 32 so we can use sliding window
   if test != 'shannon' and test != 'bien' and test != 'tbien':
     print("Non existing type of test or null data.")
     return None
