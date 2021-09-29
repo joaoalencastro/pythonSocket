@@ -127,7 +127,7 @@ def truncate_hex(data, bytes):
   This only works for hex strings
   '''
   # First, we need the first 256 bytes of our data in ASCII, which means 512 hex characters. The first 256bytes is arbitrary
-  data = data[:512]
+  #data = data[:512]
   # Then, we iterate it and chop the last char until is divisible by the number of bytes provided
   while (len(data) % bytes * 2 != 0):
       data = data[:-1]

@@ -81,25 +81,38 @@ Para a próxima prática:
 			bien_window: 32 bits ~tamanho mínimo: 2bits ~tamanho máximo: 32bits
 			tbien_window: 32 bits ~tamanho mínimo: 2bits (explicar que não faz sentido utilizar apenas 2 bits; ou entropia 0 ou entropia 1) ~tamanho máximo: não há máximo (a fins de estudos.....explicar de o porquê usar 32 bits)
 		Tipos/Cenários (capturas limpas):
-			- Cenário 1: UDP_plaintext
-			- Cenário 2: UDP_encrypted
-			- Cenário 3: UDP_DNS_legitimo
-			- Cenário 4: TCP_plaintext
-			- Cenário 5: TCP_encrypted
-			- Cenário 6: TCP_HTTP_legitimo
+			- Cenário 1: UDP_plaintext - udp-rfc761-plaintext-dinamico.ndjson
+			- Cenário 2: UDP_encrypted - udp-rfc761-encrypted-dinamico.ndjson
+			- Cenário 3: UDP_DNS_legitimo - dns-legitimo.ndjson
+			- Cenário 4: TCP_plaintext - tcp-rfc761-plaintext-dinamico.ndjson
+			- Cenário 5: TCP_encrypted - tcp-rfc761-encrypted-dinamico.ndjson
+			- Cenário 6: http-legitimo.ndjson
 			- Possível cenário 7: dns cover channel: ex.: dns stager
+
+		Obs.: Nome do indice deve ser lowercase e com hifen
+		
+		To do:
+			C1) indexado, processado, plotado
+			C2) indexado, processado, plotado
+			C3) indexado, processado, plotado
+			C4) indexado, processado, plotado
+			C5) indexado, processado, plotado
+			C6) indexado, processado, plotado
+			
+		Obs.: Não precisa se preocupar com os ACK, FIN, pacotes de controle no geral, pois o python só processou aqueles pacotes com *PAYLOAD*.
 
 	Teoria:
 		Falar que não precisa haver tanta preocupação com TLS, pois hoje em dia, equipamentos de borda já são extremamente restritos com a checagem por certificados e CAs. Além daqueles que são capazes de realizar inspeção do tráfego SSL/TLS ao fazerem a interceptação dos pacotes criptografados.
 		Explicar também que alguns bytes devem ser descartados devido ao limite imposto pelo cálculo da entropia. Dê exemplo.
+		Mudando de estratégia de envio:
+		Ao implementar a própria aplicação, o desenvolvedor decide o número de bytes que serão utilizados para cada transferência. Pois isso reflete diretamente na responsividade ou tempo de resposta da aplicação. No caso da aplicação edsenvolvida para o projeto, só a simples ação de encher um buffer de determinado tamanho (1024 bytes) e enviá-lo, já é suficiente a fim de testes. Aqui não há a necessidade de enviar pequenos ou médios pacotes, não há a necessidade de baixa latência ou tempo rápido de resposta. As quatro aplicações, TCP plaintext, TCP encrypted, UDP plaintext e UDP encrypted foram desenvolvidas de forma semelhante à descrita acima. Portanto, o valor 1024 é arbitrário e não carrega nenhum significado mais profundo.
 		
 	Dúvidas:
 		
 	Devo:
 		mudar a estratégia de envio
 		fazer o corte menos pra shannon (análise) qual o tamanho mínimo
-		Deixar claro que eu não estou fazendo a comparação entre as diferentes entropia. As amostras são comparadas entre mesmas entropias.
-		Um novo gráfico comparar plaintext e cypher text p/ cada algoritmo de entropia
+		Deixar claro que eu não estou fazendo a comparação entre as diferentes entropias. As amostras são comparadas entre mesmas entropias.
 		Ler de novo o paper novamente e ter uma explicação para o máximo do tbien.
 
 
@@ -122,18 +135,22 @@ UDP_128bytes_plaintext_rfc761.pcapng
 
 
 
+"$(netstat -n | grep 'ESTABLISHED' | grep 138:22 | md5sum)"
+netstat -n | grep 17570 | md5sum | cut -c 1-32
+"INPUTCONN=$(netstat -n | grep 17570 | md5sum | cut -c 1-32)"
+
+
+Até então a ideia de usar um comando no input e recuperar pela viariavel de ambiente no output do arquivo de configuração do logstash está dando erro no startup do próprio logstash. Uma outra ideia seria criar algum filter pra juntar os ips e as portas pra criar uma string de fluxo, e assim usando no output.8000
 
 
 
+df1 = pd.read_csv('Outputs/packets-tcp-rfc761-plaintext-dinamico-2021.09.27-processed')
+df2 = pd.read_csv('Outputs/packets-tcp-rfc761-encrypted-dinamico-2021.09.27-processed')
+Um novo gráfico comparar plaintext e cypher text p/ cada algoritmo de entropia
 
 
-
-
-
-
-
-
-
-
+mostrar os cenários
+mostrar a comparaçao tcp
+mostrar a comparação udp e perguntar pq estão tão discrepantes
 
 
