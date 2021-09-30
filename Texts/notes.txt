@@ -118,21 +118,6 @@ Para a próxima prática:
 
 MiKTeX: C:\Users\João\AppData\Local\Programs\MiKTeX
 
-A INDEXAR:
-128bytesAESrfc761.pcapng
-32bytesAESrfc761.pcapng 					packets-2021.09.21
-64bytesAESrfc761.pcapng 
-UDP_32bytes_encryptedAES_rfc761.pcapng		packets-2021.09.22
-
-A CAPTURAR:
-UDP_64bytes_encryptedAES_rfc761.pcapng
-UDP_128bytes_encryptedAES_rfc761.pcapng
-UDP_32bytes_plaintext_rfc761.pcapng
-UDP_64bytes_plaintext_rfc761.pcapng
-UDP_128bytes_plaintext_rfc761.pcapng
-
-
-
 
 
 "$(netstat -n | grep 'ESTABLISHED' | grep 138:22 | md5sum)"
@@ -140,17 +125,24 @@ netstat -n | grep 17570 | md5sum | cut -c 1-32
 "INPUTCONN=$(netstat -n | grep 17570 | md5sum | cut -c 1-32)"
 
 
-Até então a ideia de usar um comando no input e recuperar pela viariavel de ambiente no output do arquivo de configuração do logstash está dando erro no startup do próprio logstash. Uma outra ideia seria criar algum filter pra juntar os ips e as portas pra criar uma string de fluxo, e assim usando no output.8000
-
-
-
-df1 = pd.read_csv('Outputs/packets-tcp-rfc761-plaintext-dinamico-2021.09.27-processed')
-df2 = pd.read_csv('Outputs/packets-tcp-rfc761-encrypted-dinamico-2021.09.27-processed')
-Um novo gráfico comparar plaintext e cypher text p/ cada algoritmo de entropia
 
 
 mostrar os cenários
 mostrar a comparaçao tcp
 mostrar a comparação udp e perguntar pq estão tão discrepantes
 
+
+Devo:
+	Colocar as legendas sempre
+	Dúvida: Pq a entropia de shannon tá dando baixo.
+	Escrever o porquê de a entropia estar entre 0 e 1.
+	No http tenho que ver no header do http se tem habilitada a compressão.
+	Artigo que explique diferenças entre o TCP e UDP.
+			Testar a entropia do arquivo puro e sua versão criptografada.
+	Faço um teste rápido com o tbien sem limitação. E depois poder descrever o pq 32 bits.
+	Se der tempo eu olho o algoritmo do NIST.
+	Agora associar os resultados à teoria tanto da entropia, quando do teste de embaralhamento do NIST.
+	Como não há limiar, exisitiria o meu método de criptografar duas vezes e calcular a diferença, mas a ideia foi refutada. O robson acha que não é útil para nós agora.
+	Poderia existir diferentes limiares pra diferentes aplicações.
+	Posso comparar as médias entre todos os fluxos.
 
