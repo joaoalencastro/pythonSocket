@@ -7,7 +7,7 @@ from math import log2
 from pandas import DataFrame
 
 def connect_elasticsearch():
-  host = input('Please, enter elastic host: ')
+  host = '192.168.0.138' #input('Please, enter elastic host: ')   #uncomment for changes in the network environment
 
   es = None
   es = Elasticsearch([{'host':host, 'port': 9200}])
@@ -54,7 +54,10 @@ def get_transport_protocol(packet):
 def get_payload(protocol, packet):
   # Returns the payload
   if protocol == 'udp':
-    payload = packet["_source"]["layers"]["udp_raw"]                  # this data is in the hex format without :
+    if "dns_raw" in packet["_source"]["layers"]:
+      payload = packet["_source"]["layers"]["dns_raw"]
+    else:
+      payload = packet["_source"]["layers"]["data_raw"]                  # this data is in the hex format without :
     pass
   elif protocol == 'tcp' and "tcp_tcp_payload" in packet["_source"]["layers"]["tcp"]:
     payload = packet["_source"]["layers"]["tcp"]["tcp_tcp_payload"]   # this data is in the hex format with :
@@ -122,42 +125,35 @@ def calculate_tbien(string):
 def write_df_to_csv(df, file):
   df.to_csv('Outputs/'+file, index=False)
 
-def truncate_hex(data, bytes):
+def truncate_hex(data, hex):
   '''
-  Make it divisible by number of bytes provided
+  Make it divisible by number of hex symbols provided
   This only works for hex strings
   '''
-  # First, we need the first 256 bytes of our data in ASCII, which means 512 hex characters. The first 256bytes is arbitrary
-  #data = data[:512]
-  # Then, we iterate it and chop the last char until is divisible by the number of bytes provided
-  while (len(data) % bytes * 2 != 0):
+  if len(data) < hex:
+    return None # not big enough
+  # Then, we iterate it and chop the last char until is divisible by the number of hex symbols provided
+  while (len(data) % hex != 0):
       data = data[:-1]
-  if len(data) < 8:
-    return None
   return data
 
-def sliding_window(data, test, n=8):
+def sliding_window(data, test, windowsize=7):
   '''
     Receives the data in hex and the type of test it has to work (probably entropy) with and returns the mean/average of all windows of data entropy
     n is the size of the sliding window in bytes
     Returns the average of the vector formed by the results of the tests made in each chunk of string
   '''
-  if len(data) < 8:
-    if test == 'shannon': return float(calculate_shannon_entropy(data))
-    elif test == 'bien': return float(calculate_bien('0x'+data))
-    elif test == 'tbien': return float(calculate_tbien('0x'+data))
-  else:
-    data = truncate_hex(data, 8)  # this will make the hex raw data be divisible by 8 hex symbols so we can use sliding window
+  sum = 0
   if test != 'shannon' and test != 'bien' and test != 'tbien':
     print("Non existing type of test or null data.")
     return None
-  elif data == None or len(data) == 0: return None
-  elif test == 'shannon':
-    # We do not need a sliding window in this case.
-    return float(calculate_shannon_entropy(data)) # for shannon's entropy we don't need the '0x'
-  sum = 0
-  windowsize = n * 2
-  windowsnum = int(len(data)/windowsize)
+  data = truncate_hex(data, windowsize)  # this will make the hex raw data be divisible by 8 hex symbols so we can use sliding window
+  if data is None: 
+    return None
+  elif len(data) == 0: 
+    return None
+  else: pass
+  windowsnum = int(len(data)/float(windowsize))
   for i in range(1, windowsnum + 1):
     hex_data = '0x' + data[(i - 1) * windowsize : i * windowsize]
     if test == 'bien':
@@ -197,7 +193,7 @@ if __name__ == '__main__':
       new_doc['srcport'] = ports[0]
       new_doc['dstport'] = ports[1]
       new_doc['payload_size'] = payload_size
-      new_doc['shannon'] = sliding_window(raw_data, 'shannon')
+      new_doc['shannon'] = calculate_shannon_entropy(raw_data)
       new_doc['bien'] = sliding_window(raw_data, 'bien')
       new_doc['tbien'] = sliding_window(raw_data, 'tbien')
 

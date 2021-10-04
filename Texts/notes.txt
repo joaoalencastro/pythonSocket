@@ -81,12 +81,12 @@ Para a próxima prática:
 			bien_window: 32 bits ~tamanho mínimo: 2bits ~tamanho máximo: 32bits
 			tbien_window: 32 bits ~tamanho mínimo: 2bits (explicar que não faz sentido utilizar apenas 2 bits; ou entropia 0 ou entropia 1) ~tamanho máximo: não há máximo (a fins de estudos.....explicar de o porquê usar 32 bits)
 		Tipos/Cenários (capturas limpas):
-			- Cenário 1: UDP_plaintext - udp-rfc761-plaintext-dinamico.ndjson
-			- Cenário 2: UDP_encrypted - udp-rfc761-encrypted-dinamico.ndjson
-			- Cenário 3: UDP_DNS_legitimo - dns-legitimo.ndjson
-			- Cenário 4: TCP_plaintext - tcp-rfc761-plaintext-dinamico.ndjson
-			- Cenário 5: TCP_encrypted - tcp-rfc761-encrypted-dinamico.ndjson
-			- Cenário 6: http-legitimo.ndjson
+			- Cenário 1: TCP_plaintext - tcp-rfc761-plaintext-dinamico.ndjson					INDEXADO	PLOTADO
+			- Cenário 2: TCP_encrypted - packets-tcp-rfc761-encrypted-dinamico-2021.10.03		INDEXADO	PLOTADO
+			- Cenário 3: http-legitimo.ndjson													INDEXADO	PLOTADO
+			- Cenário 4: UDP_plaintext - udp-rfc761-plaintext-dinamico.ndjson					INDEXADO	PLOTADO
+			- Cenário 5: UDP_encrypted - udp-rfc761-encrypted-dinamico.ndjson					INDEXADO	PLOTADO
+			- Cenário 6: UDP_DNS_legitimo - dns-legitimo.ndjson									INDEXADO	PLOTADO
 			- Possível cenário 7: dns cover channel: ex.: dns stager
 
 		Obs.: Nome do indice deve ser lowercase e com hifen
@@ -145,4 +145,35 @@ Devo:
 	Como não há limiar, exisitiria o meu método de criptografar duas vezes e calcular a diferença, mas a ideia foi refutada. O robson acha que não é útil para nós agora.
 	Poderia existir diferentes limiares pra diferentes aplicações.
 	Posso comparar as médias entre todos os fluxos.
+
+
+Feito:
+	Eu criei um container httpd para servir um HTTP sem compressão, além disso, peguei o meu portfolio (website stático) e retirei as imagens, pois elas já estavam comprimidas em jpeg. [link:https://hub.docker.com/_/httpd]
+	Usei o site da IANA [link:https://www.iana.org/assignments/http-parameters/http-parameters.xhtml#content-coding] para saber qual é o atributo HTTP para que eu posso retirar a compressão da transmissão, no caso era o 'identity'.
+
+Domingo:
+	Diminuí o tamanho da janela deslizante para 7 símbolos hex, ou seja, 28 bits!! Isso porque se uso exatamente 32 bits o código briga comigo, e esta é a maneira como é calculada a entropia pelo próprio dev do algoritmo. E como trabalho com hex, não posso diminuir um bit apenas para uma janela de 31. Explicar no texto.
+	Havia um erro na coleta do dados raw do UDP!!!!! Foi consertado.
+	
+próx reuniao:
+	Falar o que foi feito acima
+	Mostrar os novos resultados em comparação com o pdf no drive "PFG_old_wrong_data.pdf".
+	
+	
+	796 -> começo do capítulo de revisão de conceitos 
+	819 -> inferência estatística, teste de hipótese
+
+	Wilcoxon test article https://onlinelibrary.wiley.com/doi/abs/10.1002/9780471462422.eoct979
+	Another wicoxon test article https://www.jstor.org/stable/2236101
+	
+	Shapiro test for normality https://www.jstor.org/stable/2333709 - Cited by 19823
+	
+	No HTTP é melhor utilizar o arquivio de texto fonte que eu já estava utilizando. Fazer com e seu compressão.
+	
+	Tenho que deixar claro que a mina cnopfiança é pra dizer se o meu texto é criptografado ou se ele n~~ao é cripto, copressed,etc
+	Não considerar texto de blog.
+	
+	
+	
+	
 
