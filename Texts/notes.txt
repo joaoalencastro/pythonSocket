@@ -102,7 +102,7 @@ Para a próxima prática:
 		Obs.: Não precisa se preocupar com os ACK, FIN, pacotes de controle no geral, pois o python só processou aqueles pacotes com *PAYLOAD*.
 
 	Teoria:
-		Falar que não precisa haver tanta preocupação com TLS, pois hoje em dia, equipamentos de borda já são extremamente restritos com a checagem por certificados e CAs. Além daqueles que são capazes de realizar inspeção do tráfego SSL/TLS ao fazerem a interceptação dos pacotes criptografados.
+		Falar que não precisa haver tanta preocupação com TLS, pois hoje em dia, equipamentos de borda já são extremamente restritos com a checagem por certificados e CAs. Além daqueles que são capazes de realizar inspeção do tráfego SSL/TLS ao fazerem a interceptação dos pacotes criptografados. -> Introdução
 		Explicar também que alguns bytes devem ser descartados devido ao limite imposto pelo cálculo da entropia. Dê exemplo.
 		Mudando de estratégia de envio:
 		Ao implementar a própria aplicação, o desenvolvedor decide o número de bytes que serão utilizados para cada transferência. Pois isso reflete diretamente na responsividade ou tempo de resposta da aplicação. No caso da aplicação edsenvolvida para o projeto, só a simples ação de encher um buffer de determinado tamanho (1024 bytes) e enviá-lo, já é suficiente a fim de testes. Aqui não há a necessidade de enviar pequenos ou médios pacotes, não há a necessidade de baixa latência ou tempo rápido de resposta. As quatro aplicações, TCP plaintext, TCP encrypted, UDP plaintext e UDP encrypted foram desenvolvidas de forma semelhante à descrita acima. Portanto, o valor 1024 é arbitrário e não carrega nenhum significado mais profundo.
@@ -124,12 +124,6 @@ MiKTeX: C:\Users\João\AppData\Local\Programs\MiKTeX
 netstat -n | grep 17570 | md5sum | cut -c 1-32
 "INPUTCONN=$(netstat -n | grep 17570 | md5sum | cut -c 1-32)"
 
-
-
-
-mostrar os cenários
-mostrar a comparaçao tcp
-mostrar a comparação udp e perguntar pq estão tão discrepantes
 
 
 Devo:
@@ -177,5 +171,22 @@ próx reuniao:
 	
 	
 	
+Reuniao:
+	Tudo antes da introdução deve ser numerado romano, até o sumário.
+	Antes da definição do problema devo introduzir. O que é o meu trabalho, o que se ganha... Objetivos deve ser um objetivo geral e alguns específicos pra atingir o geral (estruturar uma arquitetura de coleta, ...).
+	Em discussão do problema eu coloco as ferramentas.
+	Estado da arte 3-12 página
+	Discussão do problema e proposta de solução titulo ~15pág
+	Cap 4 Resultados e Análise
+	Descrição de cenários é um tópico co cap 4, resto são subtópicos
+	Para cada subtópico, adicionar um subtópico dizendo "discussão dos resultados do cenário X".
+	Conclusão e trabalhos futuros é um caítulo só
+	Printar appêndices depois de bibliografia.
+	Arquitetura de coleta e pipeline de processamento, nome das imagens.
+	Dividir o cenário 1 em plaintext e criptografado.
+	Análise do uso de Entropia para detecção de tráfego criptografado no payload da camada de transporte. TÍTULO.
+	
 	
 
+Agora, em relação aos formulários no site do ENE, encontrei os seguintes documentos:
+Ficha de avaliação (http://www.ene.unb.br/images/Modelo_TCC_-_Eng_Redes.pdf)Check list (http://www.ene.unb.br/images/ProcedimentosTCC2checklist.pdf)Formulário Web (http://www.ene.unb.br/index.php/component/breezingforms/ff_form/22/ff_page/1?ff_form=22&ff_page=1)Aparentemente, a ficha de avaliação é um documento que deve ser preenchido pela banda ao final da apresentação. Então, me veio a dúvida de qual é a ata que eu preciso fazer upload
